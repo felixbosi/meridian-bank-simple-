@@ -1,7 +1,8 @@
--- Step 4: Try these queries once your data is loaded
+-- Step 4: 
+--Try these queries once your data is loaded
 
 USE MeridianBank;
-GO
+
 
 -- Quick check: row counts in every table
 SELECT 'Branches' AS TableName, COUNT(*) AS RowCount FROM Branches
@@ -13,8 +14,9 @@ UNION ALL SELECT 'Loans', COUNT(*) FROM Loans
 UNION ALL SELECT 'LoanPayments', COUNT(*) FROM LoanPayments;
 
 
--- Simple join: customer names... wait, we didn't store names, so join on IDs instead.
--- Total balance held per branch
+-- Let us check for the toal balance held per branch.
+-- Total balance held per branch will be;
+
 SELECT
     b.BranchName,
     COUNT(a.AccountID) AS NumAccounts,
@@ -26,7 +28,9 @@ GROUP BY b.BranchName
 ORDER BY TotalBalance DESC;
 
 
--- Loan default rate by credit score band
+-- Let us get the default rate by credit score band.
+-- Loan default rate by credit score band will be
+
 SELECT
     CASE
         WHEN c.CreditScore < 580 THEN 'Poor (<580)'
@@ -47,14 +51,18 @@ GROUP BY CASE
 ORDER BY Defaults DESC;
 
 
+-- Let us try to flag any fraudulent transactions.
 -- Flagged fraud transactions
+
 SELECT TransactionID, AccountID, TransactionDate, Amount, Channel, MerchantCategory
 FROM Transactions
 WHERE IsFlaggedFraud = 1
 ORDER BY Amount DESC;
 
 
+--let us perform a window function.
 -- Window function example: rank customers by total account balance
+
 SELECT
     a.CustomerID,
     SUM(a.CurrentBalance) AS TotalBalance,
