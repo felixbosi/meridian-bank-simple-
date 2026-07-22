@@ -1,5 +1,5 @@
 --Meridian Bank Risk Intelligence & Performance Analytics :
---Designed and built a full-stack banking analytics pipeline on a simulated retail bank dataset, translating business questions into production-style SQL
+--Designed and built a full-stack banking analytics pipeline on a retail bank dataset, translating business questions into production-style SQL
 --used for credit risk, fraud detection, and customer intelligence.
 
 Highlights:
