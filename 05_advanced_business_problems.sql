@@ -4,12 +4,9 @@
 -- These go beyond basic joins/aggregation into the kind of analysis
 -- a real risk, fraud, or customer analytics team would actually ask
 -- for. Each one is framed as a business question first, with the
--- reasoning behind the approach, because being able to explain *why*
--- you wrote a query a certain way is what actually gets discussed in
--- interviews -- not just that it runs.
+-- reasoning behind the approach.
 
 USE MeridianBank;
-GO
 
 
 -- ============================================================
@@ -19,7 +16,9 @@ GO
 -- a subscription business's churn cohort analysis, and it's exactly
 -- how a credit risk team monitors whether underwriting standards are
 -- drifting over time.
--- ============================================================
+-- Let us answer this question;
+
+
 WITH LoanCohorts AS (
     SELECT
         LoanID,
@@ -36,16 +35,17 @@ SELECT
 FROM LoanCohorts
 GROUP BY CohortQuarter
 ORDER BY CohortQuarter;
-GO
+
 
 
 -- ============================================================
 -- 2. BRANCH RISK RANKING
 -- Business question: "Which branches are originating the riskiest
 -- loans?" Only branches with 5+ loans are included so a single bad
--- loan at a small branch doesn't distort the ranking -- a real
--- analyst would apply exactly this kind of minimum-sample-size filter.
+-- loan at a small branch doesn't distort the ranking -- as a real
+-- analyst, i chose to apply exactly this kind of minimum-sample-size filter.
 -- ============================================================
+
 WITH BranchDefaults AS (
     SELECT
         b.BranchID,
@@ -65,7 +65,7 @@ SELECT
     RANK() OVER (ORDER BY CAST(Defaults AS FLOAT) / TotalLoans DESC) AS RiskRank
 FROM BranchDefaults
 ORDER BY RiskRank;
-GO
+
 
 
 -- ============================================================
@@ -73,6 +73,7 @@ GO
 -- Business question: "Flag any transaction that looks unusual for
 -- THIS SPECIFIC account" -- not unusual in general, since a $2,000
 -- transaction is normal for one customer and alarming for another.
+--- NB:
 -- This compares each transaction to that account's own trailing
 -- 30-transaction average, which is a real heuristic fraud teams use
 -- as a first-pass filter before human review.
@@ -106,7 +107,7 @@ WHERE TrailingAvgAmount IS NOT NULL
   AND Amount > 3 * TrailingAvgAmount
   AND Amount > 200   -- ignore trivially small trailing averages
 ORDER BY Amount DESC;
-GO
+
 
 
 -- ============================================================
@@ -114,8 +115,7 @@ GO
 -- Business question: "Which customers should retention/marketing
 -- prioritize?" RFM (Recency, Frequency, Monetary) is a standard
 -- customer-value framework used across banking, retail, and
--- subscription businesses -- knowing this pattern signals you
--- understand business-side customer analytics, not just SQL syntax.
+-- subscription businesses.
 -- ============================================================
 WITH CustomerActivity AS (
     SELECT
@@ -159,7 +159,7 @@ SELECT
     END AS Segment
 FROM RfmScores
 ORDER BY RfmTotal DESC;
-GO
+
 
 
 -- ============================================================
@@ -170,6 +170,7 @@ GO
 -- this demonstrates SUM() OVER and LAG() together, two of the most
 -- commonly tested window functions.
 -- ============================================================
+
 WITH MonthlyFlow AS (
     SELECT
         DATEFROMPARTS(YEAR(TransactionDate), MONTH(TransactionDate), 1) AS TxnMonth,
@@ -185,13 +186,15 @@ SELECT
     LAG(NetFlow) OVER (ORDER BY TxnMonth) AS PriorMonthNetFlow
 FROM MonthlyFlow
 ORDER BY TxnMonth;
-GO
+
 
 
 -- ============================================================
 -- 6. CROSS-SELL OPPORTUNITY IDENTIFICATION
 -- Business question: "Which active customers have never been offered
--- a loan product?" This is a real revenue-growth query -- banks make
+-- a loan product?
+--n NB:
+--This is a real revenue-growth query -- banks make
 -- meaningful revenue from cross-selling existing customers rather
 -- than acquiring new ones, so surfacing this list is directly
 -- actionable for a sales/relationship-banking team.
@@ -210,7 +213,7 @@ WHERE c.CreditScore >= 660   -- reasonable underwriting floor
 GROUP BY c.CustomerID, c.CreditScore, c.EmploymentStatus
 HAVING SUM(a.CurrentBalance) > 5000   -- meaningful existing relationship
 ORDER BY TotalBalance DESC;
-GO
+
 
 
 -- ============================================================
@@ -222,6 +225,7 @@ GO
 -- exactly the kind of proactive analysis that separates a strong
 -- analyst from someone who only reports what already happened.
 -- ============================================================
+
 WITH PaymentFlags AS (
     SELECT
         LoanID,
@@ -245,17 +249,19 @@ FROM PaymentFlags pf
 JOIN Loans l ON l.LoanID = pf.LoanID
 WHERE l.Status = 'active'   -- focus on loans not yet flagged delinquent/defaulted
 ORDER BY pf.LoanID, pf.PaymentSeq;
-GO
+
 
 
 -- ============================================================
 -- 8. DORMANT HIGH-VALUE ACCOUNTS (RE-ENGAGEMENT TARGETS)
 -- Business question: "Which dormant accounts are worth a
--- re-engagement campaign?" A dormant account sitting at $50 isn't
+-- re-engagement campaign? 
+-- Giving that " A dormant account sitting at $50 isn't
 -- worth outreach; one sitting at $15,000 is a real retention
 -- opportunity slipping away. This ranks dormant accounts by balance
 -- so a marketing team can prioritize outreach by expected value.
 -- ============================================================
+
 SELECT
     a.AccountID,
     a.CustomerID,
@@ -266,4 +272,4 @@ SELECT
 FROM Accounts a
 WHERE a.Status = 'dormant'
 ORDER BY a.CurrentBalance DESC;
-GO
+
