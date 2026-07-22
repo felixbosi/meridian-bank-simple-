@@ -1,12 +1,6 @@
--- ============================================================
--- Corrected queries -- matches the actual schema in
--- meridian-bank-simple (02_create_tables.sql): PascalCase columns,
--- no underscores, table names Customers/Loans/Accounts/Transactions/
--- LoanPayments/Branches/Cards.
--- ============================================================
+
 
 USE MeridianBank;
-GO
 
 
 -- Q1: Loan default rate by credit score band (CASE-based bucketing)
@@ -29,7 +23,7 @@ GROUP BY CASE
         ELSE 'Excellent (740+)'
     END
 ORDER BY DefaultRatePct DESC;
-GO
+
 
 
 -- Q2: Customers whose average transaction amount exceeds their branch's average
@@ -48,7 +42,7 @@ HAVING AVG(t.Amount) > (
     JOIN Accounts a2 ON a2.AccountID = t2.AccountID
     WHERE a2.BranchID = a.BranchID
 );
-GO
+
 
 
 -- Q3: Fraud rate by channel, with a subquery for the overall baseline rate for comparison
@@ -62,7 +56,7 @@ SELECT
 FROM Transactions
 GROUP BY Channel
 ORDER BY FraudRatePct DESC;
-GO
+
 
 
 -- Q4: Loans with 2+ missed payments in the trailing 6 months (delinquency early-warning)
@@ -79,7 +73,7 @@ WHERE lp.PaymentStatus = 'missed'
 GROUP BY lp.LoanID, l.CustomerID, l.LoanType, l.Status
 HAVING COUNT(*) >= 2
 ORDER BY MissedPaymentsLast6Mo DESC;
-GO
+
 
 
 -- Q5: Percentage of customers holding both a loan and an active account
@@ -89,7 +83,7 @@ SELECT
         AS PctCustomersWithLoanAndAccount
 FROM Loans l
 WHERE l.CustomerID IN (SELECT CustomerID FROM Accounts WHERE Status = 'active');
-GO
+
 
 
 -- Q6: Dormant accounts (no transactions in the trailing 12 months) with current balance > $0
@@ -107,4 +101,4 @@ WHERE a.Status IN ('active', 'dormant')
         AND t.TransactionDate >= DATEADD(MONTH, -12, '2026-07-01')
   )
 ORDER BY a.CurrentBalance DESC;
-GO
+
