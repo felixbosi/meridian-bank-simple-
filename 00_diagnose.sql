@@ -2,7 +2,7 @@
 -- This tells us precisely which tables loaded and which didn't.
 
 USE MeridianBank;
-GO
+
 
 SELECT 'Branches' AS TableName, COUNT(*) AS RowCount FROM Branches
 UNION ALL SELECT 'Customers', COUNT(*) FROM Customers
