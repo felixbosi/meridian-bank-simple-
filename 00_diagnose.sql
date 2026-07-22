@@ -4,7 +4,7 @@
 USE MeridianBank;
 
 
-SELECT 'Branches' AS TableName, COUNT(*) AS RowCount FROM Branches
+SELECT 'Branches' AS TableName, COUNT(*) AS Row_Count FROM Branches
 UNION ALL SELECT 'Customers', COUNT(*) FROM Customers
 UNION ALL SELECT 'Accounts', COUNT(*) FROM Accounts
 UNION ALL SELECT 'Cards', COUNT(*) FROM Cards
