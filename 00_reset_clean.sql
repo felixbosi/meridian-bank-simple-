@@ -3,7 +3,7 @@
 -- Does NOT drop the tables themselves -- just empties them.
 
 USE MeridianBank;
-GO
+
 
 DELETE FROM Transactions;
 DELETE FROM LoanPayments;
@@ -12,7 +12,7 @@ DELETE FROM Loans;
 DELETE FROM Accounts;
 DELETE FROM Customers;
 DELETE FROM Branches;
-GO
+
 
 -- Reset the IDENTITY counters back to 0 so new rows start at ID 1 again
 DBCC CHECKIDENT ('Branches', RESEED, 0);
@@ -22,7 +22,7 @@ DBCC CHECKIDENT ('Cards', RESEED, 0);
 DBCC CHECKIDENT ('Loans', RESEED, 0);
 DBCC CHECKIDENT ('LoanPayments', RESEED, 0);
 DBCC CHECKIDENT ('Transactions', RESEED, 0);
-GO
+
 
 -- Confirm everything is now empty
 SELECT 'Branches' AS TableName, COUNT(*) AS RowCount FROM Branches
